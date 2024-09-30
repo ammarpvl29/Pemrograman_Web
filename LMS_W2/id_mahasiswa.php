@@ -80,7 +80,7 @@
         </div>
         <div class="content">
             <div class="photo">
-                <img src="pointer_ammarp.png" alt="Student Photo">
+                <img src="pointer_ammarp.png" alt="Foto Mahasiswa">
             </div>
             <div class="info">
                 <div class="name">Ammar Pavel Zamora Siregar</div>
