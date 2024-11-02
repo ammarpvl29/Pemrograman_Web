@@ -13,6 +13,11 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2/dist/tailwind.min.css" rel="stylesheet" type="text/css" />
     <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
 
+    <link rel="icon" type="image/svg+xml" href="res/favicon.ico">
+
+    <!-- In index.html, add type="module" -->
+    <script type="module" src="js/login.js"></script>
+
     <title>Login - TO-DOIT</title>
 </head>
 <body class="min-h-screen bg-[#0B1120] flex items-center justify-center">
@@ -27,39 +32,51 @@
                             <p class="text-sm text-base-content/70 mt-2">Your Personal Productivity Hub</p>
                         </div>
 
-                        <form class="space-y-6">
-                            <p class="text-center mb-4">Please login to your account</p>
+                    <!-- index.html login form section -->
+                    <form class="space-y-6">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Email</span>
+                            </label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                placeholder="Enter your email" 
+                                class="input input-bordered input-primary"
+                                required
+                            />
+                        </div>
 
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text">Email</span>
-                                </label>
-                                <input type="email" placeholder="Email address" class="input input-bordered input-primary" />
-                            </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Password</span>
+                            </label>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                placeholder="Enter your password" 
+                                class="input input-bordered input-primary"
+                                required
+                            />
+                        </div>
 
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text">Password</span>
-                                </label>
-                                <input type="password" placeholder="Password" class="input input-bordered input-primary" />
-                                <label class="label">
-                                    <a href="#" class="label-text-alt link link-hover">Forgot password?</a>
-                                </label>
-                            </div>
+                        <button type="submit" class="btn btn-primary w-full">
+                            <span class="normal-state">Login</span>
+                            <span class="loading-state hidden">
+                                <span class="loading loading-spinner"></span>
+                                Logging in...
+                            </span>
+                        </button>
 
-                            <!-- Login Button -->
-                            <button id="loginButton" class="btn btn-primary w-full">Login</button>
+                        <!-- Add this message div -->
+                        <div id="message" class="mt-4 text-center hidden"></div>
 
-                            <!-- External script -->
-                            <script src="js/login.js"></script>
-
-                            <div class="text-center mt-4">
-
-                                <p class="text-sm">Don't have an account? 
-                                    <a href="signup.html" class="link link-primary">Sign up</a>
-                                </p>
-                            </div>
-                        </form>
+                        <div class="text-center mt-4">
+                            <p class="text-sm">Don't have an account? 
+                                <a href="signup.html" class="link link-primary">Sign Up</a>
+                            </p>
+                        </div>
+                    </form>
                     </div>
 
                     <!-- Right side - Info -->
