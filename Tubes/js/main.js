@@ -1,4 +1,4 @@
-// Abstract class for TodoItemFormatter
+// Abstract class TodoItemFormatter
 class TodoItemFormatter {
   formatTask(task) {
     return task.length > 14 ? task.slice(0, 14) + "..." : task;
@@ -13,7 +13,7 @@ class TodoItemFormatter {
   }
 }
 
-// Class responsible for managing Todo items
+// Class untuk manage item ToDO
 class TodoManager {
   constructor(todoItemFormatter) {
     this.todos = JSON.parse(localStorage.getItem("todos")) || [];
@@ -87,7 +87,7 @@ class TodoManager {
     }
 }
 
-// Class responsible for managing the UI and handling events
+// Class untuk handle UI dan event listener
 class UIManager {
   constructor(todoManager, todoItemFormatter) {
     this.todoManager = todoManager;
@@ -104,24 +104,24 @@ class UIManager {
   }
 
   addEventListeners() {
-      // Event listener for adding a new todo
+      // Event listener untuk nambah todo
       this.addBtn.addEventListener("click", () => {
           this.handleAddTodo();
       });
 
-      // Event listener for pressing Enter key in the task input
+      // Event listener untuk button Enter jadi responsif
       this.taskInput.addEventListener("keyup", (e) => {
           if (e.keyCode === 13 && this.taskInput.value.length > 0) {
               this.handleAddTodo();
           }
       });
 
-      // Event listener for deleting all todos
+      // Event listener untuk delete semua ToDO
       this.deleteAllBtn.addEventListener("click", () => {
           this.handleClearAllTodos();
       });
 
-      // Event listeners for filter buttons
+      // Event listeners untuk filter
       const filterButtons = document.querySelectorAll(".todos-filter li");
       filterButtons.forEach((button) => {
           button.addEventListener("click", () => {
@@ -250,7 +250,7 @@ setTimeout(() => {
 }
 }
 
-// Class responsible for managing the theme switcher
+// Class untuk mengganti theme (belum diimplementasikan)
 class ThemeSwitcher {
 constructor(themes, html) {
   this.themes = themes;
@@ -292,7 +292,7 @@ getThemeFromLocalStorage() {
 
 
 
-// Instantiating the classes
+// Inisiasi class
 const todoItemFormatter = new TodoItemFormatter();
 const todoManager = new TodoManager(todoItemFormatter);
 const uiManager = new UIManager(todoManager, todoItemFormatter);
