@@ -14,12 +14,12 @@ const firebaseConfig = {
   measurementId: "G-Q294ND2QS6"
 };
 
-// Initialize Firebase
+// Inisialisasi firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize services
+// Inisialisasi layanan
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Export services
+// Export layanan
 export { auth, db };

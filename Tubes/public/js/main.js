@@ -1,3 +1,22 @@
+// main.js
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAssynJdOq-sZQSYZkd1C098wmQBqMP65Q",
+  authDomain: "to-doit-3b6be.firebaseapp.com",
+  databaseURL: "https://to-doit-3b6be-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "to-doit-3b6be",
+  storageBucket: "to-doit-3b6be.firebasestorage.app",
+  messagingSenderId: "259148851304",
+  appId: "1:259148851304:web:e466d78545a72048b3f3dd",
+  measurementId: "G-Q294ND2QS6"
+};
+
+// Inisialisasi Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
 // Abstract class TodoItemFormatter
 class TodoItemFormatter {
   formatTask(task) {
@@ -89,46 +108,100 @@ class TodoManager {
 
 // Class untuk handle UI dan event listener
 class UIManager {
+  checkAuth() {
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Redirect ke login page jika user tidak terautentikasi
+        window.location.href = 'index.html';
+      }
+    });
+  }
+  initializeProfile() {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const userDisplay = document.getElementById('userDisplay');
+        const emailDisplay = document.getElementById('emailDisplay');
+  
+        if (userDisplay) {
+          userDisplay.textContent = user.displayName || 'User';
+        }
+        if (emailDisplay) {
+          emailDisplay.textContent = user.email;
+        }
+      }
+    });
+  }
   constructor(todoManager, todoItemFormatter) {
+    // Check autentikasi dulu
+    this.checkAuth();
+
+    // Inisialisasi properti
     this.todoManager = todoManager;
     this.todoItemFormatter = todoItemFormatter;
-    this.taskInput = document.querySelector("input");
-    this.dateInput = document.querySelector(".schedule-date");
-    this.addBtn = document.querySelector(".add-task-button");
+    
+    // Update selector dan tambah null checks
+    this.taskInput = document.querySelector("input[type='text']"); // More specific selector
+    this.dateInput = document.querySelector("input[type='date']");
+    this.addBtn = document.querySelector(".btn-secondary"); // Match HTML class
     this.todosListBody = document.querySelector(".todos-list-body");
     this.alertMessage = document.querySelector(".alert-message");
     this.deleteAllBtn = document.querySelector(".delete-all-btn");
+    this.signOutBtn = document.getElementById('signOutBtn');
 
-  this.addEventListeners();
-  this.showAllTodos();
+    // Validasi elemen
+    if (!this.taskInput || !this.addBtn || !this.todosListBody) {
+      console.error('Required UI elements not found');
+      return;
+    }
+
+    this.addEventListeners();
+    this.showAllTodos();
+    this.initializeProfile();
   }
 
   addEventListeners() {
-      // Event listener untuk nambah todo
+    // Add null checks sebelum adding listeners
+    if (this.addBtn) {
       this.addBtn.addEventListener("click", () => {
-          this.handleAddTodo();
+        this.handleAddTodo();
       });
+    }
 
-      // Event listener untuk button Enter jadi responsif
+    if (this.taskInput) {
       this.taskInput.addEventListener("keyup", (e) => {
-          if (e.keyCode === 13 && this.taskInput.value.length > 0) {
-              this.handleAddTodo();
-          }
+        if (e.keyCode === 13 && this.taskInput.value.length > 0) {
+          this.handleAddTodo();
+        }
       });
+    }
 
-      // Event listener untuk delete semua ToDO
+    if (this.deleteAllBtn) {
       this.deleteAllBtn.addEventListener("click", () => {
-          this.handleClearAllTodos();
+        this.handleClearAllTodos();
       });
+    }
 
-      // Event listeners untuk filter
-      const filterButtons = document.querySelectorAll(".todos-filter li");
-      filterButtons.forEach((button) => {
-          button.addEventListener("click", () => {
-              const status = button.textContent.toLowerCase();
-              this.handleFilterTodos(status);
-          });
+    if (this.signOutBtn) {
+      this.signOutBtn.addEventListener('click', async () => {
+        try {
+          await signOut(auth);
+          window.location.href = 'index.html';
+        } catch (error) {
+          this.showAlertMessage('Failed to sign out', 'error');
+        }
       });
+    }
+
+    // Filter buttons dengan null check
+    const filterButtons = document.querySelectorAll(".todos-filter li");
+    if (filterButtons.length > 0) {
+      filterButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const status = button.textContent.toLowerCase();
+          this.handleFilterTodos(status);
+        });
+      });
+    }
   }
 
   handleAddTodo() {
@@ -157,97 +230,98 @@ class UIManager {
   }
 
   displayTodos(todos) {
-
-      this.todosListBody.innerHTML = "";
-      
-      if (todos.length === 0) {
-          this.todosListBody.innerHTML = `<tr><td colspan="5" class="text-center">No task found</td></tr>`;
-          return;
-        }
-        
-      todos.forEach((todo) => {
-        this.todosListBody.innerHTML += `
-          <tr class="todo-item" data-id="${todo.id}">
-            <td>${this.todoItemFormatter.formatTask(todo.task)}</td>
-            <td>${this.todoItemFormatter.formatDueDate(todo.dueDate)}</td>
-            <td>${this.todoItemFormatter.formatStatus(todo.completed)}</td>
-            <td>
-              <button class="btn btn-warning btn-sm" onclick="uiManager.handleEditTodo('${
-                todo.id
-              }')">
-                <i class="bx bx-edit-alt bx-bx-xs"></i>    
-              </button>
-              <button class="btn btn-success btn-sm" onclick="uiManager.handleToggleStatus('${
-                todo.id
-              }')">
-                <i class="bx bx-check bx-xs"></i>
-              </button>
-              <button class="btn btn-error btn-sm" onclick="uiManager.handleDeleteTodo('${
-                todo.id
-              }')">
-                <i class="bx bx-trash bx-xs"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
+    this.todosListBody.innerHTML = "";
+    
+    if (todos.length === 0) {
+      this.todosListBody.innerHTML = `<tr><td colspan="5" class="text-center">No task found</td></tr>`;
+      return;
     }
+      
+    todos.forEach((todo) => {
+      this.todosListBody.innerHTML += `
+        <tr class="todo-item" data-id="${todo.id}">
+          <td>${this.todoItemFormatter.formatTask(todo.task)}</td>
+          <td>${this.todoItemFormatter.formatDueDate(todo.dueDate)}</td>
+          <td>${this.todoItemFormatter.formatStatus(todo.completed)}</td>
+          <td>
+            <button class="btn btn-warning btn-sm edit-btn">
+              <i class="bx bx-edit-alt bx-bx-xs"></i>    
+            </button>
+            <button class="btn btn-success btn-sm toggle-btn">
+              <i class="bx bx-check bx-xs"></i>
+            </button>
+            <button class="btn btn-error btn-sm delete-btn">
+              <i class="bx bx-trash bx-xs"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+  
+    // Tambah event listeners ke buttons
+    this.todosListBody.querySelectorAll('.todo-item').forEach(item => {
+      const id = item.dataset.id;
+      item.querySelector('.edit-btn').addEventListener('click', () => this.handleEditTodo(id));
+      item.querySelector('.toggle-btn').addEventListener('click', () => this.handleToggleStatus(id));
+      item.querySelector('.delete-btn').addEventListener('click', () => this.handleDeleteTodo(id));
+    });
+  }
     
 
   
-handleEditTodo(id) {
-  const todo = this.todoManager.todos.find((t) => t.id === id);
-  if (todo) {
-    this.taskInput.value = todo.task;
-    this.todoManager.deleteTodo(id);
+  handleEditTodo(id) {
+    const todo = this.todoManager.todos.find((t) => t.id === id);
+    if (todo) {
+      this.taskInput.value = todo.task;
+      this.todoManager.deleteTodo(id);
 
-    const handleUpdate = () => {
-      this.addBtn.innerHTML = "<i class='bx bx-plus bx-sm'></i>";
-      this.showAlertMessage("Todo updated successfully", "success");
-      this.showAllTodos();
-      this.addBtn.removeEventListener("click", handleUpdate);
-    };
+      const handleUpdate = () => {
+        this.addBtn.innerHTML = "<i class='bx bx-plus bx-sm'></i>";
+        this.showAlertMessage("Todo updated successfully", "success");
+        this.showAllTodos();
+        this.addBtn.removeEventListener("click", handleUpdate);
+      };
 
-    this.addBtn.innerHTML = "<i class='bx bx-check bx-sm'></i>";
-    this.addBtn.addEventListener("click", handleUpdate);
+      this.addBtn.innerHTML = "<i class='bx bx-check bx-sm'></i>";
+      this.addBtn.addEventListener("click", handleUpdate);
+    }
   }
-}
 
 
-handleToggleStatus(id) {
-this.todoManager.toggleTodoStatus(id);
-this.showAllTodos();
-}
+  handleToggleStatus(id) {
+  this.todoManager.toggleTodoStatus(id);
+  this.showAllTodos();
+  }
 
-handleDeleteTodo(id) {
-this.todoManager.deleteTodo(id);
-this.showAlertMessage("Todo deleted successfully", "success");
-this.showAllTodos();
-}
-
-
-handleFilterTodos(status) {
-  const filteredTodos = this.todoManager.filterTodos(status);
-  this.displayTodos(filteredTodos);
-}
+  handleDeleteTodo(id) {
+  this.todoManager.deleteTodo(id);
+  this.showAlertMessage("Todo deleted successfully", "success");
+  this.showAllTodos();
+  }
 
 
-showAlertMessage(message, type) {
-const alertBox = `
-  <div class="alert alert-${type} shadow-lg mb-5 w-full">
-    <div>
-      <span>${message}</span>
-    </div>
-  </div>
-`;
-this.alertMessage.innerHTML = alertBox;
-this.alertMessage.classList.remove("hide");
-this.alertMessage.classList.add("show");
-setTimeout(() => {
-  this.alertMessage.classList.remove("show");
-  this.alertMessage.classList.add("hide");
-}, 3000);
-}
+  handleFilterTodos(status) {
+    const filteredTodos = this.todoManager.filterTodos(status);
+    this.displayTodos(filteredTodos);
+  }
+
+
+  showAlertMessage(message, type) {
+    const alertBox = `
+      <div class="alert alert-${type} shadow-lg mb-5 w-full">
+        <div>
+          <span>${message}</span>
+        </div>
+      </div>
+    `;
+    this.alertMessage.innerHTML = alertBox;
+    this.alertMessage.classList.remove("hide");
+    this.alertMessage.classList.add("show");
+    setTimeout(() => {
+        this.alertMessage.classList.remove("show");
+        this.alertMessage.classList.add("hide");
+      }, 3000);
+    }
 }
 
 // Class untuk mengganti theme (belum diimplementasikan)
@@ -292,10 +366,10 @@ getThemeFromLocalStorage() {
 
 
 
-// Inisiasi class
-const todoItemFormatter = new TodoItemFormatter();
-const todoManager = new TodoManager(todoItemFormatter);
-const uiManager = new UIManager(todoManager, todoItemFormatter);
-const themes = document.querySelectorAll(".theme-item");
-const html = document.querySelector("html");
-const themeSwitcher = new ThemeSwitcher(themes, html);
+// At the bottom of main.js, modifikasi inisialisasi UIManager:
+document.addEventListener('DOMContentLoaded', () => {
+  const todoItemFormatter = new TodoItemFormatter();
+  const todoManager = new TodoManager(todoItemFormatter);
+  // uiManager global
+  window.uiManager = new UIManager(todoManager, todoItemFormatter);
+});

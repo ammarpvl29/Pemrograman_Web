@@ -1,17 +1,17 @@
 import { 
     createUserWithEmailAndPassword,
     signOut 
-} from 'firebase/auth';
+} from '"https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from './config.js';
 
 export const signUpUser = async (fullName, email, password) => {
     try {
-        // Create user account
+        // Bikin akun user
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Store user data in Firestore
+        // Store user di Firestore
         await setDoc(doc(db, 'users', user.uid), {
             fullName: fullName,
             email: email,
@@ -46,12 +46,18 @@ export const signUpUser = async (fullName, email, password) => {
     }
 };
 
-// Keep signOut function
-export const logoutUser = async () => {
+// In auth.js, add this new function
+export const signOutUser = async () => {
     try {
         await signOut(auth);
-        return { success: true, message: 'Logged out successfully' };
+        return {
+            success: true,
+            message: 'Signed out successfully'
+        };
     } catch (error) {
-        return { success: false, message: 'Failed to logout' };
+        return {
+            success: false,
+            message: 'Error signing out'
+        };
     }
 };

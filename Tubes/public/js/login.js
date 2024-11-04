@@ -16,7 +16,7 @@ const firebaseConfig = {
     measurementId: "G-Q294ND2QS6"
   };
 
-// Initialize Firebase
+// Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageDiv = document.getElementById('message');
     const loginButton = document.querySelector('button[type="submit"]');
 
-    // Check if elements exist
+    // Check jika elements exist
     if (!form || !messageDiv || !loginButton) {
         console.error('Required elements not found');
         return;
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const email = document.getElementById('email')?.value;
         const password = document.getElementById('password')?.value;
 
-        // Validation
+        // Validasi
         if (!email || !password) {
             showMessage('Please fill in all fields', 'error');
             return;
@@ -47,10 +47,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Attempt login
             await signInWithEmailAndPassword(auth, email, password);
             
-            // Show success message
+            // Success message
             showMessage('Login successful!', 'success');
             
-            // Redirect to todo page after brief delay
+            // Redirect ke todo page
             setTimeout(() => {
                 window.location.href = 'todo.html';
             }, 1500);

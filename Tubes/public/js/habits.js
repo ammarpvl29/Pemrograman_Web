@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Habit disimpan dalam data lokal dalam .json
     let habits = JSON.parse(localStorage.getItem('habits')) || [];
 
-    // Add new habit
+    // Tambah habit baru
     addHabitButton.addEventListener('click', () => {
         const habitName = habitInput.value.trim();
         const frequency = frequencySelect.value;

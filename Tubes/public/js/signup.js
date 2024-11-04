@@ -5,6 +5,11 @@ import {
     createUserWithEmailAndPassword,
     updateProfile
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { 
+    getFirestore, 
+    doc, 
+    setDoc 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAssynJdOq-sZQSYZkd1C098wmQBqMP65Q",
@@ -17,67 +22,66 @@ const firebaseConfig = {
     measurementId: "G-Q294ND2QS6"
   };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);  
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded'); // Debug log
-    
+  document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
-    const messageDiv = document.getElementById('message');
-
-    if (!form) {
-        console.error('Form element not found');
-        return;
-    }
-
-    console.log('Form found:', form); // Debug log
-
+    
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        console.log('Form submitted'); // Debug log
 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
         const fullName = document.getElementById('fullName').value;
-        const submitButton = document.querySelector('button[type="submit"]'); // Changed from getElementById
+        const submitButton = document.querySelector('button[type="submit"]');
 
-        console.log('Form values:', { email, fullName }); // Debug log (don't log passwords)
-
-        // Validation
+        // Validasi
         if (!email || !password || !confirmPassword || !fullName) {
             showMessage('Please fill in all fields', 'error');
             return;
         }
 
         try {
-            console.log('Starting account creation...'); // Debug log
             submitButton.disabled = true;
             submitButton.innerHTML = `
                 <span class="loading loading-spinner"></span>
                 Creating account...
             `;
 
-            // Create user account
+            // Bikin user account
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            console.log('User created:', userCredential.user.uid); // Debug log
+            const user = userCredential.user;
 
-            // Update profile
-            await updateProfile(userCredential.user, {
+            // Update Auth profile
+            await updateProfile(user, {
                 displayName: fullName
             });
 
+            // Simpan di Firestore
+            await setDoc(doc(db, 'users', user.uid), {
+                uid: user.uid,
+                fullName: fullName,
+                email: email,
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            });
+
+            console.log('Profile updated successfully');
             showMessage('Account created successfully!', 'success');
+
+            // Force reload auth state
+            await user.reload();
             
-            // Redirect to login
+            // Redirect ke login
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 2000);
 
         } catch (error) {
-            console.error('Signup error:', error); // Debug log
+            console.error('Signup error:', error);
             let errorMessage;
             
             switch (error.code) {
@@ -103,10 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function showMessage(message, type) {
     const messageDiv = document.getElementById('message');
-    if (!messageDiv) {
-        console.error('Message div not found'); // Debug log
-        return;
-    }
+    if (!messageDiv) return;
     
     messageDiv.textContent = message;
     messageDiv.className = `mt-4 text-center ${type === 'error' ? 'text-error' : 'text-success'}`;
