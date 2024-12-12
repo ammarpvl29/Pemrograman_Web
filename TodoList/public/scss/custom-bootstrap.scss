@@ -1,0 +1,31 @@
+// custom-bootstrap.scss
+@import "functions";
+@import "variables";
+
+// Override primary color to match DaisyUI/habits.html
+$primary: #661AE6; // This is the default primary color from DaisyUI night theme
+$primary-focus: #570DF8; // This is the focused state
+
+// Merge with existing theme colors
+$theme-colors: map-merge($theme-colors, (
+  "primary": $primary
+));
+
+// Import Bootstrap
+@import "bootstrap";
+
+// Additional custom styles to ensure Bootstrap components match DaisyUI
+.btn-primary {
+  background-color: $primary;
+  border-color: $primary;
+  &:hover, &:focus {
+    background-color: $primary-focus;
+    border-color: $primary-focus;
+  }
+}
+
+.navbar-dark {
+  --bs-navbar-color: rgba(255, 255, 255, 0.75);
+  --bs-navbar-hover-color: rgba(255, 255, 255, 0.9);
+  --bs-navbar-active-color: #fff;
+}
